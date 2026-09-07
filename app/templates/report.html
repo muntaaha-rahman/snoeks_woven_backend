@@ -1,0 +1,144 @@
+<html>
+<head>
+<style>
+  @page { size: A4; margin: 1.5cm; }
+  body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #1a1a1a; }
+  h1 { font-size: 16pt; margin-bottom: 0; color: #1c3d5a; }
+  .subtitle { color: #666; margin-top: 2px; margin-bottom: 16px; }
+
+  table.customer-box { width: 100%; border: 1px solid #ccc; border-collapse: collapse; margin-bottom: 18px; table-layout: fixed; }
+  table.customer-box td { padding: 4px 8px; border: none; word-wrap: break-word; }
+  table.customer-box col.label { width: 16%; }
+  table.customer-box col.value { width: 34%; }
+
+  h2 { font-size: 13pt; background: #1c3d5a; color: white; padding: 4px 8px; margin-top: 20px; }
+  h3 { font-size: 11pt; color: #1c3d5a; border-bottom: 1px solid #ccc; padding-bottom: 2px; margin-bottom: 6px; }
+
+  .item-box { border: 1px solid #ddd; margin-bottom: 8px; padding: 4px; }
+  table.fieldgrid { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  table.fieldgrid col.label { width: 20%; }
+  table.fieldgrid col.value { width: 30%; }
+  table.fieldgrid td { padding: 2px 6px; font-size: 9pt; vertical-align: top; word-wrap: break-word; }
+  table.fieldgrid td.fg-label { color: #555; }
+  table.fieldgrid td.fg-value { font-weight: bold; }
+
+  .footer { margin-top: 24px; font-size: 8pt; color: #888; }
+</style>
+</head>
+<body>
+  <h1>{{ company_name }}</h1>
+  <div class="subtitle">Measurement report</div>
+
+  <table class="customer-box">
+    <colgroup>
+      <col class="label"/><col class="value"/><col class="label"/><col class="value"/>
+    </colgroup>
+    <tr><td><b>Customer</b></td><td>{{ visit.customer_name }}</td>
+        <td><b>Date</b></td><td>{{ visit.visit_date }}</td></tr>
+    <tr><td><b>Address</b></td><td>{{ visit.address }}</td>
+        <td><b>Postal code / city</b></td><td>{{ visit.postal_code }} {{ visit.city }}</td></tr>
+    <tr><td><b>Phone</b></td><td>{{ visit.phone }}</td>
+        <td><b>Email</b></td><td>{{ visit.email }}</td></tr>
+    <tr><td><b>Surveyor</b></td><td>{{ visit.surveyor_name }}</td>
+        <td><b>Notes</b></td><td>{{ visit.property_notes }}</td></tr>
+  </table>
+
+  {% macro field_grid(pairs) %}
+  <table class="fieldgrid">
+    <colgroup><col class="label"/><col class="value"/><col class="label"/><col class="value"/></colgroup>
+    {% for row in pairs|batch(2) %}
+    <tr>
+      {% for label, value in row %}
+      <td class="fg-label">{{ label }}</td><td class="fg-value">{{ value }}</td>
+      {% endfor %}
+      {% if row|length == 1 %}<td class="fg-label"></td><td class="fg-value"></td>{% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  {% endmacro %}
+
+  {% for room in visit.rooms %}
+  <h2>Room: {{ room.name }}</h2>
+
+  {% if room.window_treatments %}
+  <h3>Window treatments</h3>
+  {% for i in room.window_treatments %}
+  <div class="item-box">
+    {{ field_grid([
+      ("Size (mm)", (i.width_mm|string) ~ " x " ~ (i.height_mm|string)),
+      ("Product", i.product),
+      ("Fabric/colour", i.fabric_colour_sample),
+      ("Frame reveal depth (mm)", i.frame_reveal_depth_mm or ""),
+      ("Operating side", i.operating_side),
+      ("Operating type", i.operating_type),
+      ("Profile colour", i.profile_colour),
+      ("Opening direction", i.window_opening_direction),
+      ("Mounting", i.mounting),
+      ("Note", i.note),
+    ]) }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if room.flooring_sections %}
+  <h3>Flooring</h3>
+  {% for i in room.flooring_sections %}
+  <div class="item-box">
+    {{ field_grid([
+      ("Size (m)", (i.length_m|string) ~ " x " ~ (i.width_m|string)),
+      ("Area (m2)", i.area_m2),
+      ("Subfloor type", i.subfloor_type),
+      ("Levelling required", "Yes" if i.levelling_required else "No"),
+      ("Underfloor heating", "Yes" if i.underfloor_heating_present else "No"),
+      ("Laying direction", i.laying_direction),
+      ("Sound insulation", i.sound_insulation_requirement),
+      ("Note", i.note),
+    ]) }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if room.insect_screens %}
+  <h3>Insect screens</h3>
+  {% for i in room.insect_screens %}
+  <div class="item-box">
+    {{ field_grid([
+      ("Size (mm)", (i.width_mm|string) ~ " x " ~ (i.height_mm|string)),
+      ("Mount type", i.mount_type),
+      ("Window/door type", i.window_door_type),
+      ("Opening direction", i.opening_direction),
+      ("Frame reveal depth (mm)", i.frame_reveal_depth_mm or ""),
+      ("Profile colour", i.profile_colour),
+      ("Mesh sample", i.mesh_sample),
+      ("Operating side", i.operating_side),
+      ("Mounting surface", i.mounting_surface),
+      ("Note", i.note),
+    ]) }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if room.sun_shadings %}
+  <h3>Sun shading</h3>
+  {% for i in room.sun_shadings %}
+  <div class="item-box">
+    {{ field_grid([
+      ("Width (mm)", i.width_mm),
+      ("Height/projection (mm)", i.height_projection_mm),
+      ("Mounting surface", i.mounting_surface),
+      ("Obstacles", i.obstacles),
+      ("Wind resistance", i.wind_resistance),
+      ("Fabric colour", i.fabric_colour_sample),
+      ("Housing/arm colour", i.housing_arm_colour_sample),
+      ("Mounting height (mm)", i.mounting_height_mm or ""),
+      ("Note", i.note),
+    ]) }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% endfor %}
+
+  <div class="footer">Generated by the {{ company_name }} measurement app.</div>
+</body>
+</html>
