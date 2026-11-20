@@ -19,20 +19,20 @@ def _get_visit_or_404(db: Session, visit_id: str) -> models.Visit:
     return visit
 
 
-def _generate_and_send(db: Session, visit: models.Visit) -> models.Visit:
+def _generate_and_send(db: Session, visit: models.Visit, lang: str | None = None) -> models.Visit:
     visit_dict = crud.serialize_visit(db, visit)
     try:
-        pdf_bytes = render_visit_pdf(visit_dict)
-        send_report_email(visit_dict, pdf_bytes)
+        pdf_bytes = render_visit_pdf(visit_dict, lang)
+        send_report_email(visit_dict, pdf_bytes, lang)
     except Exception as exc:  # noqa: BLE001 - report any failure back to the user
         return crud.set_email_status(db, visit, sent=False, error=str(exc))
     return crud.set_email_status(db, visit, sent=True, error=None)
 
 
 @router.post("", response_model=schemas.VisitOut)
-def create_visit(data: schemas.VisitIn, db: Session = Depends(get_db)):
+def create_visit(data: schemas.VisitIn, lang: str = "en", db: Session = Depends(get_db)):
     visit = crud.create_visit(db, data)
-    visit = _generate_and_send(db, visit)
+    visit = _generate_and_send(db, visit, lang)
     return crud.serialize_visit(db, visit)
 
 
@@ -57,10 +57,10 @@ def get_visit(visit_id: str, db: Session = Depends(get_db)):
 
 
 @router.put("/{visit_id}", response_model=schemas.VisitOut)
-def update_visit(visit_id: str, data: schemas.VisitIn, db: Session = Depends(get_db)):
+def update_visit(visit_id: str, data: schemas.VisitIn, lang: str = "en", db: Session = Depends(get_db)):
     visit = _get_visit_or_404(db, visit_id)
     visit = crud.update_visit(db, visit, data)
-    visit = _generate_and_send(db, visit)
+    visit = _generate_and_send(db, visit, lang)
     return crud.serialize_visit(db, visit)
 
 
@@ -71,17 +71,17 @@ def delete_visit(visit_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{visit_id}/resend-email", response_model=schemas.VisitOut)
-def resend_email(visit_id: str, db: Session = Depends(get_db)):
+def resend_email(visit_id: str, lang: str = "en", db: Session = Depends(get_db)):
     visit = _get_visit_or_404(db, visit_id)
-    visit = _generate_and_send(db, visit)
+    visit = _generate_and_send(db, visit, lang)
     return crud.serialize_visit(db, visit)
 
 
 @router.get("/{visit_id}/pdf")
-def download_pdf(visit_id: str, db: Session = Depends(get_db)):
+def download_pdf(visit_id: str, lang: str = "en", db: Session = Depends(get_db)):
     visit = _get_visit_or_404(db, visit_id)
     visit_dict = crud.serialize_visit(db, visit)
-    pdf_bytes = render_visit_pdf(visit_dict)
+    pdf_bytes = render_visit_pdf(visit_dict, lang)
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

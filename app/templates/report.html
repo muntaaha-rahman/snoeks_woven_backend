@@ -1,4 +1,4 @@
-<html>
+<html lang="{{ lang }}">
 <head>
 <style>
   @page { size: A4; margin: 1.5cm; }
@@ -27,20 +27,20 @@
 </head>
 <body>
   <h1>{{ company_name }}</h1>
-  <div class="subtitle">Measurement report</div>
+  <div class="subtitle">{{ t('report_title') }}</div>
 
   <table class="customer-box">
     <colgroup>
       <col class="label"/><col class="value"/><col class="label"/><col class="value"/>
     </colgroup>
-    <tr><td><b>Customer</b></td><td>{{ visit.customer_name }}</td>
-        <td><b>Date</b></td><td>{{ visit.visit_date }}</td></tr>
-    <tr><td><b>Address</b></td><td>{{ visit.address }}</td>
-        <td><b>Postal code / city</b></td><td>{{ visit.postal_code }} {{ visit.city }}</td></tr>
-    <tr><td><b>Phone</b></td><td>{{ visit.phone }}</td>
-        <td><b>Email</b></td><td>{{ visit.email }}</td></tr>
-    <tr><td><b>Surveyor</b></td><td>{{ visit.surveyor_name }}</td>
-        <td><b>Notes</b></td><td>{{ visit.property_notes }}</td></tr>
+    <tr><td><b>{{ t('customer') }}</b></td><td>{{ visit.customer_name }}</td>
+        <td><b>{{ t('date') }}</b></td><td>{{ visit.visit_date }}</td></tr>
+    <tr><td><b>{{ t('address') }}</b></td><td>{{ visit.address }}</td>
+        <td><b>{{ t('postal_city') }}</b></td><td>{{ visit.postal_code }} {{ visit.city }}</td></tr>
+    <tr><td><b>{{ t('phone') }}</b></td><td>{{ visit.phone }}</td>
+        <td><b>{{ t('email') }}</b></td><td>{{ visit.email }}</td></tr>
+    <tr><td><b>{{ t('surveyor') }}</b></td><td>{{ visit.surveyor_name }}</td>
+        <td><b>{{ t('notes') }}</b></td><td>{{ visit.property_notes }}</td></tr>
   </table>
 
   {% macro field_grid(pairs) %}
@@ -58,80 +58,80 @@
   {% endmacro %}
 
   {% for room in visit.rooms %}
-  <h2>Room: {{ room.name }}</h2>
+  <h2>{{ t('room') }}: {{ room.name }}</h2>
 
   {% if room.window_treatments %}
-  <h3>Window treatments</h3>
+  <h3>{{ t('window_treatments') }}</h3>
   {% for i in room.window_treatments %}
   <div class="item-box">
     {{ field_grid([
-      ("Size (mm)", (i.width_mm|string) ~ " x " ~ (i.height_mm|string)),
-      ("Product", i.product),
-      ("Fabric/colour", i.fabric_colour_sample),
-      ("Frame reveal depth (mm)", i.frame_reveal_depth_mm or ""),
-      ("Operating side", i.operating_side),
-      ("Operating type", i.operating_type),
-      ("Profile colour", i.profile_colour),
-      ("Opening direction", i.window_opening_direction),
-      ("Mounting", i.mounting),
-      ("Note", i.note),
+      (t('size_mm'), (i.width_mm|string) ~ " x " ~ (i.height_mm|string)),
+      (t('product'), v(i.product)),
+      (t('fabric_colour'), i.fabric_colour_sample),
+      (t('reveal'), i.frame_reveal_depth_mm or ""),
+      (t('operating_side'), v(i.operating_side)),
+      (t('operating_type'), v(i.operating_type)),
+      (t('profile_colour'), i.profile_colour),
+      (t('opening_direction'), v(i.window_opening_direction)),
+      (t('mounting'), v(i.mounting)),
+      (t('note'), i.note),
     ]) }}
   </div>
   {% endfor %}
   {% endif %}
 
   {% if room.flooring_sections %}
-  <h3>Flooring</h3>
+  <h3>{{ t('flooring') }}</h3>
   {% for i in room.flooring_sections %}
   <div class="item-box">
     {{ field_grid([
-      ("Size (m)", (i.length_m|string) ~ " x " ~ (i.width_m|string)),
-      ("Area (m2)", i.area_m2),
-      ("Subfloor type", i.subfloor_type),
-      ("Levelling required", "Yes" if i.levelling_required else "No"),
-      ("Underfloor heating", "Yes" if i.underfloor_heating_present else "No"),
-      ("Laying direction", i.laying_direction),
-      ("Sound insulation", i.sound_insulation_requirement),
-      ("Note", i.note),
+      (t('size_m'), (i.length_m|string) ~ " x " ~ (i.width_m|string)),
+      (t('area'), i.area_m2),
+      (t('subfloor'), v(i.subfloor_type)),
+      (t('levelling'), t('yes') if i.levelling_required else t('no')),
+      (t('underfloor'), t('yes') if i.underfloor_heating_present else t('no')),
+      (t('laying'), i.laying_direction),
+      (t('sound'), i.sound_insulation_requirement),
+      (t('note'), i.note),
     ]) }}
   </div>
   {% endfor %}
   {% endif %}
 
   {% if room.insect_screens %}
-  <h3>Insect screens</h3>
+  <h3>{{ t('insect_screens') }}</h3>
   {% for i in room.insect_screens %}
   <div class="item-box">
     {{ field_grid([
-      ("Size (mm)", (i.width_mm|string) ~ " x " ~ (i.height_mm|string)),
-      ("Mount type", i.mount_type),
-      ("Window/door type", i.window_door_type),
-      ("Opening direction", i.opening_direction),
-      ("Frame reveal depth (mm)", i.frame_reveal_depth_mm or ""),
-      ("Profile colour", i.profile_colour),
-      ("Mesh sample", i.mesh_sample),
-      ("Operating side", i.operating_side),
-      ("Mounting surface", i.mounting_surface),
-      ("Note", i.note),
+      (t('size_mm'), (i.width_mm|string) ~ " x " ~ (i.height_mm|string)),
+      (t('mount_type'), v(i.mount_type, 'mount:')),
+      (t('window_door_type'), v(i.window_door_type)),
+      (t('opening_direction'), i.opening_direction),
+      (t('reveal'), i.frame_reveal_depth_mm or ""),
+      (t('profile_colour'), i.profile_colour),
+      (t('mesh'), i.mesh_sample),
+      (t('operating_side'), v(i.operating_side)),
+      (t('mounting_surface'), v(i.mounting_surface)),
+      (t('note'), i.note),
     ]) }}
   </div>
   {% endfor %}
   {% endif %}
 
   {% if room.sun_shadings %}
-  <h3>Sun shading</h3>
+  <h3>{{ t('sun_shading') }}</h3>
   {% for i in room.sun_shadings %}
   <div class="item-box">
     {{ field_grid([
-      ("Width (mm)", i.width_mm),
-      ("Height/projection (mm)", i.height_projection_mm),
-      ("Mounting surface", i.mounting_surface),
-      ("Obstacles", i.obstacles),
-      ("Wind resistance", i.wind_resistance),
-      ("Fabric colour", i.fabric_colour_sample),
-      ("Housing/arm colour", i.housing_arm_colour_sample),
-      ("Mounting height (mm)", i.mounting_height_mm or ""),
-      ("Note", i.note),
+      (t('width_mm'), i.width_mm),
+      (t('height_projection'), i.height_projection_mm),
+      (t('mounting_surface'), v(i.mounting_surface)),
+      (t('obstacles'), i.obstacles),
+      (t('wind'), i.wind_resistance),
+      (t('sun_fabric'), i.fabric_colour_sample),
+      (t('housing_arm'), i.housing_arm_colour_sample),
+      (t('mounting_height'), i.mounting_height_mm or ""),
+      (t('note'), i.note),
     ]) }}
   </div>
   {% endfor %}
@@ -139,6 +139,6 @@
 
   {% endfor %}
 
-  <div class="footer">Generated by the {{ company_name }} measurement app.</div>
+  <div class="footer">{{ t('footer', company=company_name) }}</div>
 </body>
 </html>
